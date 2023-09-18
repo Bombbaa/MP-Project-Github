@@ -17,15 +17,15 @@ type MonthlyData = {
   monthlyAverage: number;
 };
 
-interface DepartmentGroupWorkMonthly {
+type DepartmentGroupWorkMonthly = {
   departmentgroups: string;
   dailyCounts: MonthlyData[];
   monthlyAverages: number[];
-}
+};
 
-interface MonthlyBarChartProps {
+type MonthlyBarChartProps = {
   MonthlyAPI: DepartmentGroupWorkMonthly[];
-}
+};
 
 export default function MonthlyBarchart({ MonthlyAPI }: MonthlyBarChartProps) {
   const currentDay = dayjs().date();
@@ -112,7 +112,7 @@ export default function MonthlyBarchart({ MonthlyAPI }: MonthlyBarChartProps) {
         },
         ticks: {
           // Use the callback function to customize the tick values
-          callback: (index: number) => {
+          callback: (index: any) => {
             if (
               index === 0 ||
               index === Math.floor(labelMonthly.length / 2) ||
@@ -138,7 +138,6 @@ export default function MonthlyBarchart({ MonthlyAPI }: MonthlyBarChartProps) {
 
     maintainAspectRatio: false, // Disable aspect ratio
     responsive: true, // Make the chart responsive
-    height: 300, // Set the height of the canvas
   };
 
   return (

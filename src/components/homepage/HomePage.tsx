@@ -6,6 +6,7 @@ import OverallTable from "@/components/homepage/OverallTable";
 import DepartmentGroupChart from "./DepartmentGroupChart";
 import DepartmentChart from "./DepartmentChart";
 import MonthlyBarChart from "./MonthlyBarChart";
+import YearlyLineChart from "./YearlyLineChart";
 
 type HomeProps = {
   OverallTableData: Table[];
@@ -39,7 +40,7 @@ type Department = {
 };
 
 interface DepartmentGroupWorkMonthlyYearly {
-  departmentgroup_Name: string;
+  departmentgroups: string;
   dailyCounts: MonthlyData[];
   monthlyAverages: number[];
 }
@@ -63,6 +64,7 @@ export function Homepage({
         <DepartmentGroupChart DepartmentGroupAPI={DepartmentGroupData} />
         <DepartmentChart DepartmentAPI={DepartmentData} />
         <MonthlyBarChart MonthlyAPI={MonthlyYearlyData} />
+        <YearlyLineChart YearlyAPI={MonthlyYearlyData} />
       </main>
 
       <OverallTable OverallTableAPI={OverallTableData} />

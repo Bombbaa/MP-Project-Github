@@ -70,6 +70,8 @@ export default function OverallTable({ OverallTableAPI }: OverallTableProps) {
     null
   );
 
+  console.log(sectionFliter);
+
   const generateTableCellsData = useCallback(() => {
     return OverallTableAPI.map((item) =>
       TableCells(
