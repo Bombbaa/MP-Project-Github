@@ -1,27 +1,37 @@
+body {
+  @apply text-primary bg-[#f3f4f6];
+}
+
+.side-btn {
+  @apply m-1 p-2 hover:bg-red-100 rounded-xl transition-all;
+}
+
+.square-btn {
+  @apply bg-red-200 text-red-400 p-3 flex items-center hover:bg-red-200 hover:text-red-500 focus:ring-red-400 transition-colors active:duration-150 focus:ring-2 rounded-lg;
+}
+
+.nav-btn {
+  @apply bg-red-200 text-red-400  rounded-full p-3 flex items-center hover:bg-red-200 hover:text-red-500 focus:ring-red-400 transition-colors duration-150 focus:ring-2;
+}
+
+.grid-container {
+  @apply grid grid-cols-2 gap-3 w-full max-lg:grid-cols-1 mx-auto;
+}
+
+.grid-box {
+  @apply bg-white rounded-2xl h-full drop-shadow-lg flex flex-col gap-y-2 p-4 m-1 max-md:mx-2 my-0 basis-0 grow;
+}
+
+.balance {
+  text-wrap: balance;
+}
+
+.text-limit {
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow: hidden; /* Hide any overflowed text */
+  text-overflow: ellipsis; /* Show ellipsis (...) for overflowed text */
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
-}
