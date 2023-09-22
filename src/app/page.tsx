@@ -188,14 +188,7 @@ export default async function Home() {
           employee: {
             select: {
               id: true,
-              attendance: {
-                where: {
-                  created_Date: {
-                    gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
-                    lte: tomorrowStart.toDate(),
-                  },
-                },
-              },
+              attendance: true,
             },
           },
         },
