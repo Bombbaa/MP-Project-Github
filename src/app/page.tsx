@@ -1,113 +1,295 @@
-import Image from 'next/image'
+import { Homepage } from "../components/homepage/HomePage";
+import { PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
+const prisma = new PrismaClient();
 
-export default function Home() {
+export default async function Home() {
+  const tomorrowStart = dayjs().add(1, "day").startOf("day"); // เวลาเริ่มต้นของวันพรุ่งนี้ (00:00:00)
+
+  const departmentGroups = await prisma.departmentgroup.findMany({
+    include: {
+      department: {
+        include: {
+          section: {
+            include: {
+              employee: {
+                include: {
+                  attendance: {
+                    where: {
+                      created_Date: {
+                        gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
+                        lte: tomorrowStart.toDate(),
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const DepartmentGroupCount = departmentGroups.map((group) => {
+    const countStatus2 = group.department.reduce((acc, department) => {
+      const departmentCount = department.section.reduce(
+        (departmentAcc, section) => {
+          const sectionCount = section.employee.reduce(
+            (sectionAcc, employee) => {
+              if (employee.attendance) {
+                const status2Count = employee.attendance.filter(
+                  (attendance) => attendance.status_Id === 2
+                ).length;
+                return sectionAcc + status2Count;
+              }
+              return sectionAcc;
+            },
+            0
+          );
+          return departmentAcc + sectionCount;
+        },
+        0
+      );
+      return acc + departmentCount;
+    }, 0);
+
+    const countStatus3 = group.department.reduce((acc, department) => {
+      const departmentCount = department.section.reduce(
+        (departmentAcc, section) => {
+          const sectionCount = section.employee.reduce(
+            (sectionAcc, employee) => {
+              if (employee.attendance) {
+                const status3Count = employee.attendance.filter(
+                  (attendance) =>
+                    attendance.status_Id !== 1 && attendance.status_Id !== 2
+                ).length;
+                return sectionAcc + status3Count;
+              }
+              return sectionAcc;
+            },
+            0
+          );
+          return departmentAcc + sectionCount;
+        },
+        0
+      );
+      return acc + departmentCount;
+    }, 0);
+
+    const employeeCount = group.department.reduce((acc, department) => {
+      const departmentCount = department.section.reduce(
+        (departmentAcc, section) => {
+          const sectionCount = section.employee.length;
+          return departmentAcc + sectionCount;
+        },
+        0
+      );
+      return acc + departmentCount;
+    }, 0);
+
+    return {
+      id: group.id,
+      departmentgroups: group.departmentgroup_Name, // Extracting departmentgroup_Name
+      employeeCount: employeeCount,
+      employeeWorkCount: countStatus2,
+      employeeAbsentCount: countStatus3,
+    };
+  });
+
+  const departmentWorkGroupAllDate = await prisma.departmentgroup.findMany({
+    include: {
+      department: {
+        include: {
+          section: {
+            include: {
+              employee: {
+                include: {
+                  attendance: {
+                    where: {
+                      status_Id: 2,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const DepartmentGroupWorkMonthlyYearlyCount = departmentWorkGroupAllDate.map(
+    (group) => {
+      // สร้างอาร์เรย์เพื่อเก็บค่า dailyCounts และค่าเฉลี่ยรายเดือน
+      const monthlyData = Array.from({ length: 12 }, () => ({
+        dailyCounts: Array(dayjs().daysInMonth()).fill(0),
+        monthlyAverage: 0,
+      }));
+
+      // วนลูปผ่านแผนกและพนักงานในแต่ละ department group
+      group.department.forEach((department) => {
+        // วนลูปผ่านแผนกและพนักงานในแต่ละแผนก
+        department.section.forEach((section) => {
+          // วนลูปผ่านพนักงานในแต่ละแผนก
+          section.employee.forEach((employee) => {
+            // วนลูปผ่านประวัติการเข้างานของพนักงาน
+            employee.attendance.forEach((attendance) => {
+              // แปลงวันที่ของประวัติการเข้างานเป็นวัตถุ dayjs
+              const attendanceDate = dayjs(attendance.created_Date);
+              // หาค่าดัชนีของเดือน (0 - 11)
+              const month = attendanceDate.month();
+
+              // ตรวจสอบว่าวันที่เข้างานอยู่ในเดือนปัจจุบันหรือไม่
+
+              // ตรวจสอบว่าวันที่เข้างานไม่ใช่วันเสาร์หรืออาทิตย์
+              if (attendanceDate.day() !== 0 && attendanceDate.day() !== 6) {
+                // เพิ่มค่าในอาร์เรย์ dailyCounts โดยใช้วันที่เข้างาน - 1 เป็นดัชนี
+                monthlyData[month].dailyCounts[attendanceDate.date() - 1]++;
+              }
+            });
+          });
+        });
+      });
+
+      // คำนวณค่าเฉลี่ยรายเดือนจาก dailyCounts ของแต่ละเดือน
+      for (let i = 0; i < monthlyData.length; i++) {
+        const monthData = monthlyData[i];
+        // console.log(monthData);
+        const dailyCounts = monthData.dailyCounts;
+        // console.log(dailyCounts);
+        const nonZeroCounts = dailyCounts.filter((count) => count !== 0);
+        if (nonZeroCounts.length > 0) {
+          const total = nonZeroCounts.reduce((acc, count) => acc + count, 0);
+          const average = Math.floor(total / nonZeroCounts.length);
+          // console.log(average);
+          monthData.monthlyAverage = average;
+        }
+      }
+
+      // สร้างอาร์เรย์ของ monthlyAverages จาก monthlyData
+      const monthlyAverages = monthlyData.map(
+        (monthData) => monthData.monthlyAverage
+      );
+
+      // สร้างและคืนค่าออกมาเป็นออบเจกต์
+      return {
+        departmentgroups: group.departmentgroup_Name,
+        dailyCounts: monthlyData,
+        monthlyAverages,
+      };
+    }
+  );
+
+  const departmentsWithCounts = await prisma.department.findMany({
+    include: {
+      section: {
+        include: {
+          employee: {
+            select: {
+              id: true,
+              attendance: {
+                where: {
+                  created_Date: {
+                    gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
+                    lte: tomorrowStart.toDate(),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Calculate the counts for each department
+  const departmentCounts = departmentsWithCounts.map((department) => {
+    const employeeCount = department.section.reduce(
+      (count, section) => count + section.employee.length,
+      0
+    );
+
+    const employeeWorkCount = department.section.reduce(
+      (count, section) =>
+        count +
+        section.employee.reduce(
+          (sectionCount, employee) =>
+            sectionCount +
+            employee.attendance.filter(
+              (attendance) => attendance.status_Id === 2
+            ).length,
+          0
+        ),
+      0
+    );
+
+    const employeeAbsentCount = department.section.reduce(
+      (count, section) =>
+        count +
+        section.employee.reduce(
+          (sectionCount, employee) =>
+            sectionCount +
+            employee.attendance.filter(
+              (attendance) =>
+                attendance.status_Id !== 1 && attendance.status_Id !== 2
+            ).length,
+          0
+        ),
+      0
+    );
+
+    return {
+      id: department.id,
+      departments: department.department_Name,
+      employeeCount,
+      employeeWorkCount,
+      employeeAbsentCount,
+    };
+  });
+
+  const sectionWithEmployeeWork = await prisma.section.findMany({
+    include: {
+      employee: {
+        include: {
+          attendance: {
+            where: {
+              status_Id: 2,
+              created_Date: {
+                gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
+                lte: tomorrowStart.toDate(),
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // นับจำนวนพนักงานที่มาทำงานในแต่ละ section
+  const Table = sectionWithEmployeeWork.map((section) => {
+    const employeeWorkCount = section.employee.reduce((count, employee) => {
+      count += employee.attendance.length; // Counting attendances with status 2 for each employee
+      return count;
+    }, 0);
+
+    return {
+      id: section.id,
+      section_Code: section.section_Code,
+      section_Name: section.section_Name,
+      employeeWorkCount: employeeWorkCount,
+      employeeSumCount: section.employee.length,
+    };
+  });
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    <>
+      <Homepage
+        OverallTableData={Table}
+        DepartmentGroupData={DepartmentGroupCount}
+        DepartmentData={departmentCounts}
+        MonthlyYearlyData={DepartmentGroupWorkMonthlyYearlyCount}
+      />
+    </>
+  );
 }

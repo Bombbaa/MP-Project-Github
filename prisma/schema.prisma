@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model attendance {
+  id           Int      @id @default(autoincrement())
+  employee_Id  Int
+  shift_Id     Int
+  status_Id    Int
+  created_Date DateTime @default(now())
+  updated_Date DateTime @default(now())
+  employee     employee @relation(fields: [employee_Id], references: [id])
+  shift        shift    @relation(fields: [shift_Id], references: [id])
+  status       status   @relation(fields: [status_Id], references: [id])
+
+  @@index([employee_Id], map: "attendance_employee_Id_fkey")
+  @@index([shift_Id], map: "attendance_shift_Id_fkey")
+  @@index([status_Id], map: "attendance_status_Id_fkey")
+}
+
+model department {
+  id                 Int             @id @default(autoincrement())
+  department_Name    String
+  departmentgroup_Id Int
+  departmentgroup    departmentgroup @relation(fields: [departmentgroup_Id], references: [id])
+  section            section[]
+
+  @@index([departmentgroup_Id], map: "department_departmentgroup_Id_fkey")
+}
+
+model departmentgroup {
+  id                   Int          @id @default(autoincrement())
+  departmentgroup_Name String
+  department           department[]
+}
+
+model employee {
+  id         Int          @id @default(autoincrement())
+  asso_No    Int
+  nameThai   String       @db.VarChar(100)
+  nameEng    String       @db.VarChar(100)
+  section_Id Int
+  attendance attendance[]
+  section    section      @relation(fields: [section_Id], references: [id])
+
+  @@index([section_Id], map: "employee_section_Id_fkey")
+}
+
+model section {
+  id            Int        @id @default(autoincrement())
+  section_Code  Int
+  section_Name  String     @db.VarChar(100)
+  department_Id Int
+  employee      employee[]
+  department    department @relation(fields: [department_Id], references: [id])
+
+  @@index([department_Id], map: "section_department_Id_fkey")
+}
+
+model shift {
+  id          Int          @id @default(autoincrement())
+  shift_Types String
+  attendance  attendance[]
+}
+
+model status {
+  id          Int          @id @default(autoincrement())
+  status_Name String
+  description String?
+  attendance  attendance[]
+}
