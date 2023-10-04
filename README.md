@@ -1,34 +1,24 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+โปรเจค Manpower allocation & skill Control ใช้ Next.js (React Framework)ในการพัฒนาเว็บไซด์ สามารถอ่าน documentation (เอกสารการใช้งาน Next.js) ได้ที่ (https://nextjs.org/)
 
-## Getting Started
-
-First, run the development server:
-
-```bash
+เริ่มด้วยเปิด development server ด้วยคำสั่ง
+=>
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิดเมื่อพิมพ์ npm run dev เรียบร้อยให้ไปยัง =>[http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. ภาษาที่ใช้ในการพัฒนาเว็บไซด์จะมีอยู่ทั้งหมดหลักๆ 3 ภาษาด้วยกัน
+   1.1 HTML
+   1.2 CSS
+   1.3 TypeScript
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+2. โดยโปรเจคนี้ได้มีการใช้ไลบรารี (library) หลายอย่างเพื่อการพัฒนาที่สะดวกและเหมาะสมแก่การใช้งาน
+   2.1 Tailwind CSS เพื่อการเขียน CSS ที่ง่ายยิ่งขึ้น
+   - โดยสามารถศึกษา Tailwind CSS ได้ที่ => (https://tailwindcss.com/)
+     2.2 Material UI ในการสร้าง UI ของเว็บไซด์เช่น ปุ่มกด (Button), กล่องข้อความ (Text Field) และอื่นๆอีกมากมาย
+   - โดยสามารถศึกษา Material UI ได้ที่ => (https://mui.com/material-ui/)
+     2.3 Chart.js เพื่อสร้าง Visualize Chart (กราฟแสดงข้อมูล)
+   - โดยสามารถศึกษา Chart.js ได้ที่ => (https://www.chartjs.org/)
+     2.4 Prisma ORM เพื่อใช้การสร้าง table, relationship (RDBMS) และอื่นๆอีกมากมายที่ใช้ในการพัฒนาฐานข้อมูลและ Query ข้อมูลจากฐานข้อมูล
+   - โดยสามารถศึกษา Prisma ORM ได้ที่ => (https://www.prisma.io/)
+     ที่กล่าวมาข้างต้นคือ library ที่ถูกใช้เป็นส่วนมากในโปรเจค Manpower allocation & skill Control
+     นอกจากนี้ยังคงมี library อีกเล็กน้อยที่มีการใช้งานสามารถเช็คได้ที่ไฟล์ package.json ใน folder โปรเจค
