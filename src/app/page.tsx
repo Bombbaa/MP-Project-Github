@@ -1,10 +1,12 @@
-import { Homepage } from "../components/homepage/HomePage";
+import { Homepage } from "@/components/homepage/HomePage";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 const prisma = new PrismaClient();
 
 export default async function Home() {
   const tomorrowStart = dayjs().add(1, "day").startOf("day"); // เวลาเริ่มต้นของวันพรุ่งนี้ (00:00:00)
+  const startTime = dayjs().startOf("day");
+  const endTime = dayjs().endOf("day");
 
   const departmentGroups = await prisma.departmentgroup.findMany({
     include: {
@@ -17,8 +19,8 @@ export default async function Home() {
                   attendance: {
                     where: {
                       created_Date: {
-                        gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
-                        lte: tomorrowStart.toDate(),
+                        gte: startTime.toDate(),
+                        lte: endTime.toDate(),
                       },
                     },
                   },
@@ -123,7 +125,7 @@ export default async function Home() {
     (group) => {
       // สร้างอาร์เรย์เพื่อเก็บค่า dailyCounts และค่าเฉลี่ยรายเดือน
       const monthlyData = Array.from({ length: 12 }, () => ({
-        dailyCounts: Array(dayjs().daysInMonth()).fill(0),
+        dailyCounts: Array(31).fill(0),
         monthlyAverage: 0,
       }));
 
@@ -188,7 +190,14 @@ export default async function Home() {
           employee: {
             select: {
               id: true,
-              attendance: true,
+              attendance: {
+                where: {
+                  created_Date: {
+                    gte: startTime.toDate(),
+                    lte: endTime.toDate(),
+                  },
+                },
+              },
             },
           },
         },
@@ -249,7 +258,7 @@ export default async function Home() {
             where: {
               status_Id: 2,
               created_Date: {
-                gte: new Date(), //มากกว่าเท่ากับวันปัจจุบัน
+                gte: new Date(),
                 lte: tomorrowStart.toDate(),
               },
             },

@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -11,13 +12,12 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import Popover from "@mui/material/Popover";
 import PopupState, { bindTrigger, bindPopover } from "material-ui-popup-state";
 import { usePopupState } from "material-ui-popup-state/hooks";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import create from "zustand";
 import { useStoreAPI } from "../../../stores/store";
 
 type TableSummaryProps = {
@@ -439,9 +439,9 @@ export function TableSummary({ SummaryTableAPI }: TableSummaryProps) {
                             {rows.statusInfoShiftDay &&
                             rows.statusInfoShiftDay.length > 0 ? (
                               <Typography sx={{ p: 1 }}>
-                                <h2 className="flex justify-center mb-2 font-bold text-lg text-red-600 underline decoration-double">
+                                <span className="flex justify-center mb-2 font-bold text-lg text-red-600 underline">
                                   รายชื่อพนักงานที่ลา
-                                </h2>
+                                </span>
                                 {rows.statusInfoShiftDay.map(
                                   (status, statusIndex) => (
                                     <Typography
@@ -506,9 +506,9 @@ export function TableSummary({ SummaryTableAPI }: TableSummaryProps) {
                             {rows.statusInfoShiftNight &&
                             rows.statusInfoShiftNight.length > 0 ? (
                               <Typography sx={{ p: 1 }}>
-                                <h2 className="flex justify-center mb-2 font-bold text-lg text-red-600 underline decoration-double">
+                                <span className="flex justify-center mb-2 font-bold text-lg text-red-600 underline">
                                   รายชื่อพนักงานที่ลา
-                                </h2>
+                                </span>
                                 {rows.statusInfoShiftNight.map(
                                   (status, statusIndex) => (
                                     <Typography
@@ -573,9 +573,9 @@ export function TableSummary({ SummaryTableAPI }: TableSummaryProps) {
                             {rows.statusInfoSummary &&
                             rows.statusInfoSummary.length > 0 ? (
                               <Typography sx={{ p: 1 }}>
-                                <h2 className="flex justify-center mb-2 font-bold text-lg text-red-600 underline decoration-double">
+                                <span className="flex justify-center mb-2 font-bold text-lg text-red-600 underline">
                                   รายชื่อพนักงานที่ลา
-                                </h2>
+                                </span>
                                 {rows.statusInfoSummary.map(
                                   (status, statusIndex) => (
                                     <Typography

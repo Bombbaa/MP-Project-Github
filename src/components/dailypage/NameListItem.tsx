@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -8,274 +8,351 @@ import styled from "@emotion/styled";
 import { Switch } from "@mui/material";
 import { Controller } from "react-hook-form";
 import dayjs, { Dayjs } from "dayjs";
+import { useStoreAPI } from "../../../stores/store";
 
-interface Employee {
+type Employee = {
   id: number;
   asso_No: number;
   nameThai: string;
+  nameEng: string;
   attendance: Attendance[];
-}
+};
 
-interface Attendance {
+type Attendance = {
   id: number;
   employee_Id: number;
   shift_Id: number;
   status_Id: number;
   created_Date: Date;
   updated_Date: Date;
-}
+  submitted: boolean;
+};
 
-interface EmployeeCardProps {
-  employee: Employee;
-  control: any;
-  currentDates: Dayjs;
-}
+type EmployeeCardProps = {
+  filterData: Employee[];
+  selectedDate: Dayjs;
+  Control: any;
+  isSwitchOnMap: any;
+  setIsSwitchOnMap: any;
+  descriptionOn: any;
+  setDescriptionOn: any;
+  attendanceSubmitted: boolean;
+};
 
 const EmployeeCard = ({
-  employee,
-  control,
-  currentDates,
+  filterData,
+  selectedDate,
+  Control,
+  isSwitchOnMap,
+  setIsSwitchOnMap,
+  descriptionOn,
+  setDescriptionOn,
+  attendanceSubmitted,
 }: EmployeeCardProps) => {
-  const [isSwitchOn, SetSwtichOn] = useState(false);
-  const [descriptionOn, SetDescriptionOn] = useState(false);
-  const [radioValue, setRadioValue] = useState<number | null>(null); // State to store the selected radio button value
-  const [lastUpdatedShiftId, setLastUpdatedShiftId] = useState<number | null>(
-    null
-  );
+  const [radioValue, setRadioValue] = useState<number | null>(null);
+
+  const employeeCount = filterData.length || 0;
+  const [workCount, setWorkCount] = React.useState<number>(0);
+  const [absentCount, setAbsentCount] = React.useState<number>(0);
+
+  const updated_Date = React.useMemo(() => {
+    return dayjs(selectedDate).format("YYYY-MM-DD HH:mm:ss");
+  }, [selectedDate]);
+
+  useEffect(() => {
+    setWorkCount(employeeCount);
+  }, [employeeCount]);
+
+  useEffect(() => {
+    useStoreAPI.setState({ setCountAPI: employeeCount });
+    useStoreAPI.setState({ setWorkAPI: workCount });
+    useStoreAPI.setState({ setAbsentAPI: absentCount });
+  }, [employeeCount, workCount, absentCount, filterData]);
 
   return (
-    <li className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 p-5 rounded-lg">
-      <div className="flex items-center">
-        <Controller
-          name={`[${employee.id}.id]`}
-          control={control}
-          defaultValue={employee.id}
-          render={({ field }) => (
-            <input
-              type="hidden"
-              name={field.name}
-              value={field.value}
-              ref={field.ref}
-              style={{ display: "none" }} // Hide the hidden field using CSS
-            />
-          )}
-        />
-        <TextField
-          label="ชื่อ-นามสกุล"
-          value={employee.nameThai} // Display the employee's nameThai
-          InputProps={{
-            readOnly: true,
-          }}
-          className="w-full"
-        />
-      </div>
-      <div className="flex items-center">
-        <TextField
-          label="รหัสพนักงาน"
-          value={employee.asso_No} // Display the employee's asso_No
-          InputProps={{
-            readOnly: true,
-          }}
-          className="w-full"
-        />
-      </div>
-      <div className="flex flex-col items-center justify-center">
-        <h3 className="text-center font-bold">สถานะการมาทำงาน</h3>
-        <fieldset>
-          <legend className="sr-only">สถานะการมาทำงาน</legend>
-          <div>
-            <label>
-              <Controller
-                name={`${employee.id}.status_Id`}
-                control={control}
-                defaultValue={2}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        color="success"
-                        checked={field.value === 2}
-                        onChange={(event) => {
-                          field.onChange(2);
-                          SetSwtichOn(false);
-                        }}
-                      />
-                    }
-                    label="มาทำงาน"
-                  />
-                )}
-              />
-            </label>
-
-            <label>
-              <Controller
-                name={`${employee.id}.status_Id`}
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        color="error"
-                        checked={field.value === radioValue}
-                        onChange={(event) => {
-                          field.onChange(radioValue);
-                          SetSwtichOn(true);
-                        }}
-                      />
-                    }
-                    label="ลางาน"
-                  />
-                )}
-              />
-            </label>
-          </div>
-        </fieldset>
-      </div>
-      <div className="flex justify-center items-center">
-        <label>
-          <Controller
-            name={`${employee.id}.shift_Id`}
-            control={control}
-            defaultValue={2} // Set the default value to 2
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <MaterialUISwitch
-                    sx={{ m: 1 }}
-                    checked={field.value === 3} // Check if it's 3 (You want it to be 3)
-                    onChange={(event) => {
-                      const newShiftId = field.value === 3 ? 2 : 3;
-                      field.onChange(newShiftId);
-                      setLastUpdatedShiftId(newShiftId);
-                    }}
-                  />
-                }
-                label="สถานะการมาทำงาน"
-              />
-            )}
-          />
-        </label>
-      </div>
-      {isSwitchOn === true && (
-        <div className="col-span-1 sm:col-span-2 lg:col-span-4 px-5 py-7 bg-slate-100 border rounded-md flex flex-col items-center gap-5 slide-in">
-          <h3 className="text-center text-2xl font-bold my-4">
-            เหตุผลประกอบการลา
-          </h3>
-          <RadioGroup
-            name={`${employee.id}.status_Id`}
-            value={radioValue}
-            onChange={(event) => {
-              const newValue = parseInt(event.target.value, 10);
-              setRadioValue(newValue);
-            }}
+    <>
+      <ul className="flex flex-col p-10 w-full bg-white mx-auto gap-y-10 justify-around border border-gray-200 rounded-md">
+        {filterData.map((employee: Employee) => (
+          <li
+            key={employee.id}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 p-5 rounded-lg"
           >
-            <div className="grid grid-cols-3 gap-x-10 max-sm:grid-cols-1 place-items-start">
+            <div className="flex items-center">
               <Controller
-                name={`${employee.id}.status_Id`}
-                control={control}
+                key={employee.id}
+                name={`[${employee.id}.employee_Id]`}
+                control={Control}
+                defaultValue={employee.id}
                 render={({ field }) => (
-                  <label>
-                    <FormControlLabel
-                      control={
-                        <Radio
-                          color="warning"
-                          checked={field.value === 3}
-                          value={3}
-                          onChange={(event) => {
-                            field.onChange(3);
-                            SetDescriptionOn(false);
-                          }}
-                          required
-                        />
-                      }
-                      label="ลาป่วย"
-                    />
-                  </label>
+                  <input
+                    type="hidden"
+                    name={field.name}
+                    value={field.value}
+                    ref={field.ref}
+                    style={{ display: "none" }}
+                  />
                 )}
               />
-              <Controller
-                name={`${employee.id}.status_Id`}
-                control={control}
-                render={({ field }) => (
-                  <label>
-                    <FormControlLabel
-                      control={
-                        <Radio
-                          color="warning"
-                          checked={field.value === 4}
-                          value={4}
-                          onChange={(event) => {
-                            field.onChange(4);
-                            SetDescriptionOn(false);
-                          }}
-                          required
-                        />
-                      }
-                      label="ลาพักร้อน"
-                    />
-                  </label>
-                )}
-              />
-              <Controller
-                name={`${employee.id}.status_Id`}
-                control={control}
-                render={({ field }) => (
-                  <label>
-                    <FormControlLabel
-                      control={
-                        <Radio
-                          color="warning"
-                          checked={field.value === 5}
-                          value={5}
-                          onChange={(event) => {
-                            field.onChange(5);
-                            SetDescriptionOn(true);
-                          }}
-                          required
-                        />
-                      }
-                      label="อื่นๆ"
-                    />
-                  </label>
-                )}
+              <TextField
+                label="ชื่อ-นามสกุล"
+                value={employee.nameThai}
+                InputProps={{
+                  readOnly: true,
+                }}
+                className="w-full"
               />
             </div>
-          </RadioGroup>
-          {descriptionOn === true && (
+            <div className="flex items-center">
+              <TextField
+                label="รหัสพนักงาน"
+                value={employee.asso_No}
+                InputProps={{
+                  readOnly: true,
+                }}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              <h3 className="text-center font-bold">สถานะการมาทำงาน</h3>
+              <fieldset>
+                <div>
+                  <label>
+                    <Controller
+                      key={employee.id}
+                      name={`${employee.id}.status_Id`}
+                      control={Control}
+                      defaultValue={2}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              color="success"
+                              checked={field.value === 2}
+                              onChange={(e: any) => {
+                                const employeeId = employee.id;
+                                field.onChange(2);
+                                if (field.value != 2) {
+                                  setWorkCount((prevCount) => prevCount + 1);
+                                  setAbsentCount((prevCount) => prevCount - 1);
+                                }
+                                setIsSwitchOnMap((prevMap: any) => ({
+                                  ...prevMap,
+                                  [employeeId]: false,
+                                }));
+                              }}
+                            />
+                          }
+                          label="มาทำงาน"
+                          disabled={attendanceSubmitted}
+                        />
+                      )}
+                    />
+                  </label>
+                  <label>
+                    <Controller
+                      key={employee.id}
+                      name={`${employee.id}.status_Id`}
+                      control={Control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              color="error"
+                              checked={field.value !== 2}
+                              onChange={(e: any) => {
+                                const employeeId = employee.id;
+                                field.onChange(3);
+                                if (field.value === 2) {
+                                  setWorkCount((prevCount) => prevCount - 1);
+                                  setAbsentCount((prevCount) => prevCount + 1);
+                                }
+                                setIsSwitchOnMap((prevMap: any) => ({
+                                  ...prevMap,
+                                  [employeeId]: true,
+                                }));
+                              }}
+                            />
+                          }
+                          label="ลางาน"
+                          disabled={attendanceSubmitted}
+                        />
+                      )}
+                    />
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+            <div className="flex flex-col justify-center items-center">
+              <h3 className="text-center font-bold">shift พนักงาน</h3>
+              <fieldset>
+                <label>
+                  <Controller
+                    key={employee.id}
+                    name={`${employee.id}.shift_Id`}
+                    control={Control}
+                    defaultValue={2}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={
+                          <MaterialUISwitch
+                            sx={{ m: 1 }}
+                            checked={field.value === 3}
+                            onChange={() => {
+                              const newShiftId = field.value === 3 ? 2 : 3;
+                              field.onChange(newShiftId);
+                            }}
+                            name={field.name}
+                          />
+                        }
+                        label={field.value === 3 ? "กลางคืน" : "กลางวัน"}
+                        disabled={attendanceSubmitted}
+                      />
+                    )}
+                  />
+                </label>
+              </fieldset>
+            </div>
+            {isSwitchOnMap[employee.id] && (
+              <div className="col-span-1 sm:col-span-2 lg:col-span-4 px-5 py-7 bg-slate-100 border rounded-md flex flex-col items-center gap-5 slide-in">
+                <h3 className="text-center text-2xl font-bold my-4">
+                  เหตุผลประกอบการลา
+                </h3>
+                <RadioGroup
+                  key={employee.id}
+                  name={`${employee.id}.status_Id`}
+                  value={radioValue}
+                  onChange={(event) => {
+                    const newValue = parseInt(event.target.value, 10);
+                    setRadioValue(newValue);
+                  }}
+                >
+                  <div className="grid grid-cols-3 gap-x-10 max-sm:grid-cols-1 place-items-start">
+                    <Controller
+                      key={employee.id}
+                      name={`${employee.id}.status_Id`}
+                      control={Control}
+                      render={({ field }) => (
+                        <label>
+                          <FormControlLabel
+                            control={
+                              <Radio
+                                color="warning"
+                                checked={field.value === 3}
+                                value={3}
+                                onChange={() => {
+                                  field.onChange(3);
+                                  setDescriptionOn(
+                                    (prevDescriptionOn: any) => ({
+                                      ...prevDescriptionOn,
+                                      [employee.id]: false,
+                                    })
+                                  );
+                                }}
+                                required
+                              />
+                            }
+                            label="ลาป่วย"
+                          />
+                        </label>
+                      )}
+                    />
+                    <Controller
+                      key={employee.id}
+                      name={`${employee.id}.status_Id`}
+                      control={Control}
+                      render={({ field }) => (
+                        <label>
+                          <FormControlLabel
+                            control={
+                              <Radio
+                                color="warning"
+                                checked={field.value === 4}
+                                value={4}
+                                onChange={() => {
+                                  field.onChange(4);
+                                  setDescriptionOn(
+                                    (prevDescriptionOn: any) => ({
+                                      ...prevDescriptionOn,
+                                      [employee.id]: false,
+                                    })
+                                  );
+                                }}
+                                required
+                              />
+                            }
+                            label="ลาพักร้อน"
+                          />
+                        </label>
+                      )}
+                    />
+                    <Controller
+                      key={employee.id}
+                      name={`${employee.id}.status_Id`}
+                      control={Control}
+                      render={({ field }) => (
+                        <label>
+                          <FormControlLabel
+                            control={
+                              <Radio
+                                color="warning"
+                                checked={field.value === 5}
+                                value={5}
+                                onChange={() => {
+                                  field.onChange(5);
+                                  setDescriptionOn(
+                                    (prevDescriptionOn: any) => ({
+                                      ...prevDescriptionOn,
+                                      [employee.id]: true,
+                                    })
+                                  );
+                                }}
+                                required
+                              />
+                            }
+                            label="อื่นๆ"
+                          />
+                        </label>
+                      )}
+                    />
+                  </div>
+                </RadioGroup>
+                {descriptionOn[employee.id] && (
+                  <Controller
+                    name={`${employee.id}.description`}
+                    control={Control}
+                    shouldUnregister={false}
+                    render={({ field }) => (
+                      <TextField
+                        label="สาเหตุ..."
+                        multiline
+                        rows={4}
+                        className="w-3/5 max-lg:w-full bg-white"
+                        required
+                        {...field}
+                      />
+                    )}
+                  />
+                )}
+              </div>
+            )}
             <Controller
-              name={`${employee.id}.description`} // Unique name for the TextField
-              control={control}
-              // defaultValue={null}
-              shouldUnregister={false} // Add this prop to prevent unregistration
+              key={updated_Date}
+              name={`${employee.id}.updated_Date`}
+              control={Control}
+              defaultValue={updated_Date}
               render={({ field }) => (
-                <TextField
-                  label="สาเหตุ..."
-                  multiline
-                  rows={4}
-                  className="w-3/5 max-lg:w-full bg-white"
-                  required
-                  {...field}
+                <input
+                  type="hidden"
+                  name={field.name}
+                  value={field.value}
+                  style={{ display: "none" }}
                 />
               )}
             />
-          )}
-        </div>
-      )}
-      <Controller
-        name={`${employee.id}.updated_Date`} // Unique name for the TextField
-        control={control}
-        defaultValue={dayjs(currentDates).format("YYYY-MM-DD HH:mm:ss")}
-        render={({ field }) => (
-          <input
-            type="hidden"
-            name={field.name}
-            value={field.value}
-            ref={field.ref}
-            style={{ display: "none" }} // Hide the hidden field using CSS
-          />
-        )}
-      />
-    </li>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 };
 

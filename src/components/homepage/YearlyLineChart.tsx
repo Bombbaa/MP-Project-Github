@@ -1,3 +1,4 @@
+"use client";
 import {
   Chart as ChartJS,
   LineElement,
@@ -87,7 +88,7 @@ export default function YearlyLineChart({ YearlyAPI }: YearlyLineChartProps) {
       {
         label: "จำนวนของพนักงานที่เข้าทำงานเฉลี่ยต่อเดือน",
         data: summedWorkDaily,
-        backgroundColor: "#40e0d0",
+        backgroundColor: "#3DD0AE",
         borderColor: "#40e0d0",
         tension: 0.2,
       },

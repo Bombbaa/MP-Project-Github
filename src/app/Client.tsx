@@ -1,5 +1,4 @@
 "use client";
-import { useStoreAPI } from "../../stores/store";
 import { useEffect } from "react";
 
 type ClientProps = {};

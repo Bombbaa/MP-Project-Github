@@ -1,3 +1,4 @@
+"use client";
 import {
   Chart as ChartJS,
   BarElement,
@@ -128,7 +129,7 @@ export default function SummaryShiftChart({
   };
 
   return (
-    <div className="col-span-1 p-5 bg-white rounded-2xl  flex-1 drop-shadow-lg lg:col-span-2">
+    <div className="col-span-1 p-5 bg-white rounded-2xl flex-1 drop-shadow-lg md:col-span-2">
       <h2 className="text-center text-2xl font-bold my-4">{datepickerAPI}</h2>
       <Bar data={data} options={options} height={421} />
     </div>

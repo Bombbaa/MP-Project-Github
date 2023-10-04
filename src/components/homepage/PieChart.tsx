@@ -1,7 +1,7 @@
+"use client";
 import { useMemo, useEffect } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Pie } from "react-chartjs-2";
-// import { useStoreAPI } from "../../../stores/store";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -45,7 +45,7 @@ export default function PieChart({ DepartmentGroupAPI }: PieChartProps) {
       {
         label: "จำนวนของพนักงาน",
         data: [totalEmployeeWorkCount, totalEmployeeAbsentCount],
-        backgroundColor: ["#40e0d0", "#FF1E00"],
+        backgroundColor: ["#3DD0AE", "#FF2121"],
       },
     ],
   };

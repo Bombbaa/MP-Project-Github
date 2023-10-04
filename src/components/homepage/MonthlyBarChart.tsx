@@ -1,3 +1,4 @@
+"use client";
 import {
   Chart as ChartJS,
   BarElement,
@@ -89,7 +90,7 @@ export default function MonthlyBarchart({ MonthlyAPI }: MonthlyBarChartProps) {
       {
         label: "จำนวนของพนักงานที่เข้าทำงานเฉลี่ยต่อเดือน",
         data: dailyCountsSummary,
-        backgroundColor: "#40e0d0",
+        backgroundColor: "#3DD0AE",
       },
     ],
   };

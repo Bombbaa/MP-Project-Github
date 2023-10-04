@@ -29,6 +29,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.46.1",
+    "sweetalert2": "^11.7.31",
     "tailwindcss": "3.3.3",
     "typescript": "5.2.2",
     "zustand": "^4.4.1"
