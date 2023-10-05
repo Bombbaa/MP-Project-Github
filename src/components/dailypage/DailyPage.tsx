@@ -8,7 +8,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 
-import SuccessModal from "@/components/SuccessModal";
 import { Navigation } from "@/components/Navigation";
 import Title from "@/components/Title";
 import dayjs from "dayjs";

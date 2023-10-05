@@ -1,7 +1,7 @@
 "use server";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
-import { revalidatePath } from "next/cache";
+// import { revalidatePath } from "next/cache";
 
 const prisma = new PrismaClient();
 
@@ -44,7 +44,7 @@ export async function modifyAttendance(e: any) {
         },
       });
     }
-    revalidatePath("/daily");
+    // revalidatePath("/daily");
     // console.log("Attendance records ready to be modify.");
   } catch (err) {
     console.error("Error updating attendance:", err);

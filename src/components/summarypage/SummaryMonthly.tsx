@@ -96,12 +96,12 @@ export default function SummaryMonthlyChart({
       {
         label: "จำนวนพนักงานที่มา",
         data: filteredDailyData.map((entry) => entry.workPlan),
-        backgroundColor: "#40e0d0",
+        backgroundColor: "#3DD0AE",
       },
       {
         label: "จำนวนพนักงานที่ไม่มา",
         data: filteredDailyData.map((entry) => entry.absent),
-        backgroundColor: "#FF1E00",
+        backgroundColor: "#FF2121",
       },
     ],
   };

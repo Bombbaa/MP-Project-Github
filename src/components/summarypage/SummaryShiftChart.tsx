@@ -91,7 +91,7 @@ export default function SummaryShiftChart({
           filteredDailyData[day - 1]?.workplanDay || 0,
           filteredDailyData[day - 1]?.workplanNight || 0,
         ],
-        backgroundColor: "#40e0d0",
+        backgroundColor: "#3DD0AE",
       },
       {
         label: "จำนวนพนักงานที่ไม่มา",
@@ -99,7 +99,7 @@ export default function SummaryShiftChart({
           filteredDailyData[day - 1]?.absentDay || 0,
           filteredDailyData[day - 1]?.absentNight || 0,
         ],
-        backgroundColor: "#FF1E00",
+        backgroundColor: "#FF2121",
       },
     ],
   };
