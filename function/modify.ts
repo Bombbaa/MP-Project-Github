@@ -39,6 +39,8 @@ export async function modifyAttendance(e: any) {
           },
         },
         data: {
+          status_Id: 1,
+          shift_Id: 1,
           updated_Date: currentDate.toDate(),
           submitted: false,
         },
